@@ -1,14 +1,11 @@
-module HopfTorus1
+module HopfTorus3
   where
-import           Control.Monad                     (forM_, when)
-import qualified Data.ByteString                   as B
+import           Control.Monad                (forM_)
 import           Data.IORef
-import           Data.Tuple.Extra                  (fst3, snd3, thd3)
-import           Graphics.Rendering.OpenGL.Capture (capturePPM)
+import           Data.Tuple.Extra             (fst3, snd3, thd3)
 import           Graphics.Rendering.OpenGL.GL
 import           Graphics.UI.GLUT
-import           Linear                            (V3 (..))
-import           Text.Printf
+import           Linear                       (V3 (..))
 import           Utils.Hopf
 import           Utils.TransformationMatrix
 
@@ -18,14 +15,24 @@ pointToV3 :: Point -> V3 GLfloat
 pointToV3 (x,y,z) = V3 x y z
 
 tripletOnCircle :: GLfloat -> (Point, Point, Point)
-tripletOnCircle theta =
-  (stereoCircHinv theta 0 0, stereoCircHinv theta 0 2, stereoCircHinv theta 0 4)
+tripletOnCircle u =
+  ( stereoCircHinv'' x y z 0
+  , stereoCircHinv'' x y z 2
+  , stereoCircHinv'' x y z 4)
+  where
+    k = 3.0
+    n = 3.0 -- number of lobes
+    cosnu = cos (n*u)
+    d = sqrt (1 + k*k*cosnu*cosnu) -- manque sqrt sur mon blog !
+    x = cos u / d
+    y = sin u / d
+    z = k * cosnu / d
 
 myTriplets :: [(Point, Point, Point)]
-myTriplets = map tripletOnCircle theta_
+myTriplets = map tripletOnCircle u_
   where
     n = 30
-    theta_ = [2 * pi * frac i n | i <- [0 .. n-1]]
+    u_ = [-pi + 2 * pi * frac i n | i <- [0 .. n-1]]
     frac :: Int -> Int -> GLfloat
     frac p q = realToFrac p / realToFrac q
 
@@ -48,26 +55,24 @@ tmatsAndRadii = map (\triplet -> transformationMatrix
                                  (pointToV3 $ snd3 triplet)
                                  (pointToV3 $ thd3 triplet)) myTriplets
 
-display :: Context -> IORef GLfloat -> DisplayCallback
-display context alpha = do
+display :: Context -> DisplayCallback
+display context = do
   clear [ColorBuffer, DepthBuffer]
   r1 <- get (contextRot1 context)
   r2 <- get (contextRot2 context)
   r3 <- get (contextRot3 context)
   zoom <- get (contextZoom context)
-  alpha' <- get alpha
   (_, size) <- get viewport
   loadIdentity
   resize zoom size
   rotate r1 $ Vector3 1 0 0
   rotate r2 $ Vector3 0 1 0
   rotate r3 $ Vector3 0 0 1
-  rotate alpha' $ Vector3 1 1 1
   forM_ tmatsAndRadii $ \tmatAndRadius ->
     preservingMatrix $ do
       m <- newMatrix RowMajor (fst tmatAndRadius) :: IO (GLmatrix GLfloat)
       multMatrix m
-      materialDiffuse Front $= blue
+      materialDiffuse FrontAndBack $= blue
       renderObject Solid $ Torus 0.1 (snd tmatAndRadius) 30 30
   swapBuffers
 
@@ -85,11 +90,9 @@ resize zoom s@(Size w h) = do
 
 keyboard :: IORef GLfloat -> IORef GLfloat -> IORef GLfloat -- rotations
          -> IORef GLdouble -- zoom
-         -> IORef Bool -- animation
          -> KeyboardCallback
-keyboard rot1 rot2 rot3 zoom anim c _ = do
+keyboard rot1 rot2 rot3 zoom c _ = do
   case c of
-    'a' -> writeIORef anim True
     'e' -> rot1 $~! subtract 2
     'r' -> rot1 $~! (+2)
     't' -> rot2 $~! subtract 2
@@ -102,29 +105,16 @@ keyboard rot1 rot2 rot3 zoom anim c _ = do
     _   -> return ()
   postRedisplay Nothing
 
-idle :: IORef Bool -> IORef Int -> IORef GLfloat -> IdleCallback
-idle anim snapshots alpha = do
-    a <- get anim
-    s <- get snapshots
-    when a $ do
-      when (s < 360) $ do
-        let ppm = printf "ppm/torus1%04d.ppm" s
-        (>>=) capturePPM (B.writeFile ppm)
-      snapshots $~! (+1)
-      alpha $~! (+1)
-      postRedisplay Nothing
-    return ()
-
 main :: IO ()
 main = do
   _ <- getArgsAndInitialize
-  _ <- createWindow "Hopf torus: equatorial case"
+  _ <- createWindow "Hopf torus: sinusoidal case"
   windowSize $= Size 500 500
   initialDisplayMode $= [RGBAMode, DoubleBuffered, WithDepthBuffer]
   clearColor $= white
   materialAmbient FrontAndBack $= black
   lighting $= Enabled
-  -- lightModelTwoSide $= Enabled
+  lightModelTwoSide $= Enabled
   light (Light 0) $= Enabled
   position (Light 0) $= Vertex4 0 0 (-100) 1
   ambient (Light 0) $= black
@@ -136,22 +126,17 @@ main = do
   rot2 <- newIORef 0.0
   rot3 <- newIORef 0.0
   zoom <- newIORef 0.0
-  alpha <- newIORef 0.0
-  anim <- newIORef False
-  snapshots <- newIORef 0
   displayCallback $= display Context { contextRot1 = rot1,
                                        contextRot2 = rot2,
                                        contextRot3 = rot3,
                                        contextZoom = zoom }
-                             alpha
   reshapeCallback $= Just (resize 0)
-  keyboardCallback $= Just (keyboard rot1 rot2 rot3 zoom anim)
-  idleCallback $= Just (idle anim snapshots alpha)
-  putStrLn "*** Hopf torus: equatorial case ***\n\
+  keyboardCallback $= Just (keyboard rot1 rot2 rot3 zoom)
+  idleCallback $= Nothing
+  putStrLn "*** Hopf torus: sinusoidal case ***\n\
         \    To quit, press q.\n\
         \    Scene rotation:\n\
         \        e, r, t, y, u, i\n\
-        \    Animation: a\n\
         \    Zoom: l, m\n\
         \"
   mainLoop

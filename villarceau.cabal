@@ -22,11 +22,14 @@ library
                      , HopfCylinder1
                      , HopfCylinder2
                      , HopfTorus2
+                     , HopfTorus3
   build-depends:       base >= 4.7 && < 5
                      , OpenGL
                      , GLUT
                      , linear
                      , extra
+                     , gl-capture
+                     , bytestring
   default-language:    Haskell2010
   ghc-options:         -Wall
 

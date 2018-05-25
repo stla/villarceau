@@ -53,7 +53,7 @@ transformationMatrix p1 p2 p3 =
     b' = b / measure
     c' = c / measure
     n = V3 a' b' c'
-    s = sqrt (a'*a' + b'*b')
+    s = sqrt (a'*a' + b'*b') -- TODO: case a=b=0
     a'' = a' / s
     b'' = b' / s
     u = V3 b'' (-a'') 0
