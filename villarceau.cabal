@@ -14,13 +14,18 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
+  exposed-modules:     Utils.TransformationMatrix
+                     , Utils.TestTransformationMatrix
+                     , Utils.TestTransformationMatrix2
+                     , Utils.Hopf
+                     , HopfTorus1
   build-depends:       base >= 4.7 && < 5
                      , OpenGL
                      , GLUT
                      , linear
+                     , extra
   default-language:    Haskell2010
-  ghc-options     :    -Wall
+  ghc-options:         -Wall
 
 source-repository head
   type:     git
