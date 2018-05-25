@@ -65,7 +65,7 @@ transformationMatrix p1 p2 p3 =
     s = sqrt (a'*a'+b'*b')
     a'' = a'/s
     b'' = b'/s
-    u = V3 b'' (-a'') 0
+    u = V3 (-b'') a'' 0
 
     v = cross n u
     m = V4 (V4 b'' (-a'') 0 0) (V4 a' b' c' 0) (V4 v1 v2 v3 0) (V4 0 0 0 1)
@@ -108,7 +108,8 @@ tmatAndRadius = transformationMatrix
 transfo :: IO ()
 transfo = do
   m <- newMatrix RowMajor (fst tmatAndRadius) :: IO (GLmatrix GLfloat)
-  print m
+  mm <- getMatrixComponents RowMajor m
+  print mm
   multMatrix m
 
 radius :: GLdouble

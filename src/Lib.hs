@@ -40,15 +40,15 @@ circleCenterRadius p1 p2 p3 = ((center, radius), coefs1)
     radius = norm op1
 
 transformationMatrix :: (Real a, Floating a) => V3 a -> V3 a -> V3 a
-                     -> ([a], GLdouble)
+                     -> ([a], ([a], GLdouble))
 transformationMatrix p1 p2 p3 =
   -- (concatMap toList (toList (mkTransformationMat m center)), radius')
-  (concatMap toList (toList (mkTransformationMat m zero)), radius')
+  (concatMap toList (toList (mkTransformationMat m center)), (toList center, radius')) -- plus besoin de sortir center
   where
     ((center, radius), plane) = circleCenterRadius p1 p2 p3
     radius' = realToFrac radius
     V3 a b c = plane
-    measure = norm plane
+    measure = sqrt(a*a+b*b+c*c) -- norm plane
     a' = a / measure
     b' = b / measure
     c' = c / measure
@@ -67,7 +67,7 @@ transformationMatrix p1 p2 p3 =
     u = V3 b'' (-a'') 0
 
     v = cross n u
-    m = V3 u n v
+    m = transpose $ V3 u v n
     -- rotMat = V3 (V3 1 0 0) (V3 0 0 1) (V3 0 1 0) -- exchange y z
     -- rotMat = V3 (V3 0 0 1) (V3 0 1 0) (V3 1 0 0) -- exchange x z
     -- rotMat = V3 (V3 0 1 0) (V3 1 0 0) (V3 0 0 1) -- exchange x y
@@ -89,7 +89,7 @@ green      = Color4    0    1    0    0.5
 blue       = Color4    0    0    1    0.5
 
 myPoints :: [(GLfloat,GLfloat,GLfloat)]
-myPoints = [(-1,0,1),(2,1,2),(2,0,3)] -- issue if in plane z=0
+myPoints = [(-1,5,1),(2,1,8),(-5,0,3)] -- issue if in plane z=0
 
 myPointsV3 :: [V3 GLfloat]
 myPointsV3 = map toV3 myPoints
@@ -98,22 +98,31 @@ myPointsV3 = map toV3 myPoints
 
 
 
-tmatAndRadius :: ([GLfloat], GLdouble)
+tmatAndRadius :: ([GLfloat], ([GLfloat], GLdouble))
 tmatAndRadius = transformationMatrix
                 (myPointsV3!!0) (myPointsV3!!1) (myPointsV3!!2)
 
 transfo :: IO ()
 transfo = do
   m <- newMatrix RowMajor (fst tmatAndRadius) :: IO (GLmatrix GLfloat)
+  mm <- getMatrixComponents RowMajor m
+  print mm
   multMatrix m
 
 radius :: GLdouble
-radius = snd tmatAndRadius
+radius = snd (snd tmatAndRadius)
+
+center :: Vector3 GLfloat
+center = toVec3 $ fst (snd tmatAndRadius)
+  where
+    toVec3 x = Vector3 (x!!0) (x!!1) (x!!2)
 
 display :: Context -> DisplayCallback
 display context = do
   putStrLn "radius:"
   print radius
+  putStrLn "center:"
+  print center
   clear [ColorBuffer, DepthBuffer]
   r1 <- get (contextRot1 context)
   r2 <- get (contextRot2 context)
@@ -127,6 +136,7 @@ display context = do
   rotate r3 $ Vector3 0 0 1
   preservingMatrix $ do
     transfo
+--    translate center
     materialDiffuse FrontAndBack $= blue
     renderObject Solid $ Torus 0.1 radius 30 30
   renderPrimitive Triangles $ do
