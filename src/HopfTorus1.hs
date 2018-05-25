@@ -72,7 +72,7 @@ resize zoom s@(Size w h) = do
   matrixMode $= Projection
   loadIdentity
   perspective 45.0 (w'/h') 1.0 100.0
-  lookAt (Vertex3 0 0 (-20+zoom)) (Vertex3 0 0 0) (Vector3 0 1 0)
+  lookAt (Vertex3 0 0 (-10+zoom)) (Vertex3 0 0 0) (Vector3 0 1 0)
   matrixMode $= Modelview 0
   where
     w' = realToFrac w
@@ -98,7 +98,7 @@ keyboard rot1 rot2 rot3 zoom c _ = do
 main :: IO ()
 main = do
   _ <- getArgsAndInitialize
-  _ <- createWindow "Torus passing by three points"
+  _ <- createWindow "Hopf torus: equatorial case"
   windowSize $= Size 500 500
   initialDisplayMode $= [RGBAMode, DoubleBuffered, WithDepthBuffer]
   clearColor $= white
@@ -125,7 +125,7 @@ main = do
   reshapeCallback $= Just (resize 0)
   keyboardCallback $= Just (keyboard rot1 rot2 rot3 zoom)
   idleCallback $= Nothing
-  putStrLn "*** Torus passing by three points ***\n\
+  putStrLn "*** Hopf torus: equatorial case ***\n\
         \    To quit, press q.\n\
         \    Scene rotation:\n\
         \        e, r, t, y, u, i\n\
