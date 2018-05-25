@@ -26,3 +26,11 @@ stereoCircHinv theta phi xi =
     q0 = cos theta * cos phi
     q1 = sin theta * cos phi
     q2 = sin phi
+
+stereoCircHinv' :: (Num a, Floating a) => a -> a -> a -> (a, a, a)
+stereoCircHinv' theta phi xi =
+  stereoProj (hopfinverse q0 q1 q2 xi)
+  where
+    q0 = cos theta * sin phi
+    q1 = sin theta * sin phi
+    q2 = cos phi

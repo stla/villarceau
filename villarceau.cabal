@@ -19,6 +19,9 @@ library
                      , Utils.TestTransformationMatrix2
                      , Utils.Hopf
                      , HopfTorus1
+                     , HopfCylinder1
+                     , HopfCylinder2
+                     , HopfTorus2
   build-depends:       base >= 4.7 && < 5
                      , OpenGL
                      , GLUT
