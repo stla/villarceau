@@ -1,11 +1,14 @@
 module HopfTorus2
   where
-import           Control.Monad                (forM_)
+import           Control.Monad                     (forM_, when)
+import qualified Data.ByteString                   as B
 import           Data.IORef
-import           Data.Tuple.Extra             (fst3, snd3, thd3)
+import           Data.Tuple.Extra                  (fst3, snd3, thd3)
+import           Graphics.Rendering.OpenGL.Capture (capturePPM)
 import           Graphics.Rendering.OpenGL.GL
 import           Graphics.UI.GLUT
-import           Linear                       (V3 (..))
+import           Linear                            (V3 (..))
+import           Text.Printf
 import           Utils.Hopf
 import           Utils.TransformationMatrix
 
@@ -48,19 +51,21 @@ tmatsAndRadii = map (\triplet -> transformationMatrix
                                  (pointToV3 $ snd3 triplet)
                                  (pointToV3 $ thd3 triplet)) myTriplets
 
-display :: Context -> DisplayCallback
-display context = do
+display :: Context -> IORef GLfloat -> DisplayCallback
+display context alpha = do
   clear [ColorBuffer, DepthBuffer]
   r1 <- get (contextRot1 context)
   r2 <- get (contextRot2 context)
   r3 <- get (contextRot3 context)
   zoom <- get (contextZoom context)
+  alpha' <- get alpha
   (_, size) <- get viewport
   loadIdentity
   resize zoom size
   rotate r1 $ Vector3 1 0 0
   rotate r2 $ Vector3 0 1 0
   rotate r3 $ Vector3 0 0 1
+  rotate alpha' $ Vector3 1 1 1
   forM_ tmatsAndRadii $ \tmatAndRadius ->
     preservingMatrix $ do
       m <- newMatrix RowMajor (fst tmatAndRadius) :: IO (GLmatrix GLfloat)
@@ -83,9 +88,11 @@ resize zoom s@(Size w h) = do
 
 keyboard :: IORef GLfloat -> IORef GLfloat -> IORef GLfloat -- rotations
          -> IORef GLdouble -- zoom
+         -> IORef Bool -- animation
          -> KeyboardCallback
-keyboard rot1 rot2 rot3 zoom c _ = do
+keyboard rot1 rot2 rot3 zoom anim c _ = do
   case c of
+    'a' -> writeIORef anim True
     'e' -> rot1 $~! subtract 2
     'r' -> rot1 $~! (+2)
     't' -> rot2 $~! subtract 2
@@ -97,6 +104,19 @@ keyboard rot1 rot2 rot3 zoom c _ = do
     'q' -> leaveMainLoop
     _   -> return ()
   postRedisplay Nothing
+
+idle :: IORef Bool -> IORef Int -> IORef GLfloat -> IdleCallback
+idle anim snapshots alpha = do
+    a <- get anim
+    s <- get snapshots
+    when a $ do
+      when (s < 360) $ do
+        let ppm = printf "ppm/torus2%04d.ppm" s
+        (>>=) capturePPM (B.writeFile ppm)
+      snapshots $~! (+1)
+      alpha $~! (+1)
+      postRedisplay Nothing
+    return ()
 
 main :: IO ()
 main = do
@@ -115,23 +135,26 @@ main = do
   specular (Light 0) $= black
   depthFunc $= Just Less
   shadeModel $= Smooth
-  blend $= Enabled    -- allow transparency
-  blendFunc $= (SrcAlpha, OneMinusSrcAlpha)
   rot1 <- newIORef 0.0
   rot2 <- newIORef 0.0
   rot3 <- newIORef 0.0
   zoom <- newIORef 0.0
+  alpha <- newIORef 0.0
+  anim <- newIORef False
+  snapshots <- newIORef 0
   displayCallback $= display Context { contextRot1 = rot1,
                                        contextRot2 = rot2,
                                        contextRot3 = rot3,
                                        contextZoom = zoom }
+                             alpha
   reshapeCallback $= Just (resize 0)
-  keyboardCallback $= Just (keyboard rot1 rot2 rot3 zoom)
-  idleCallback $= Nothing
+  keyboardCallback $= Just (keyboard rot1 rot2 rot3 zoom anim)
+  idleCallback $= Just (idle anim snapshots alpha)
   putStrLn "*** Hopf torus: bent case ***\n\
         \    To quit, press q.\n\
         \    Scene rotation:\n\
         \        e, r, t, y, u, i\n\
         \    Zoom: l, m\n\
+        \    Animation: a\n\
         \"
   mainLoop
