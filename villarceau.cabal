@@ -27,6 +27,7 @@ library
                      , HopfCylinder2
                      , HopfTorus2
                      , HopfTorus3
+                     , HopfTorus4
   build-depends:       base >= 4.7 && < 5
                      , OpenGL
                      , GLUT
@@ -69,6 +70,18 @@ executable hopftorus3
   hs-source-dirs:      src-exe
   main-is:             ExeHopfTorus3.hs
   ghc-options:         -fllvm -main-is ExeHopfTorus3
+  build-depends:       base >= 4.7 && < 5
+                     , villarceau
+  default-language:    Haskell2010
+
+executable hopftorus4
+  if flag(exe)
+    buildable: True
+  else
+    buildable: False
+  hs-source-dirs:      src-exe
+  main-is:             ExeHopfTorus4.hs
+  ghc-options:         -fllvm -main-is ExeHopfTorus4
   build-depends:       base >= 4.7 && < 5
                      , villarceau
   default-language:    Haskell2010
