@@ -77,9 +77,9 @@ display context alpha m n = do
   rotate alpha' $ Vector3 1 1 1
   forM_ (tmatsAndRadii m' n') $ \tmatAndRadius ->
     preservingMatrix $ do
-      m <- newMatrix RowMajor (fst tmatAndRadius) :: IO (GLmatrix GLfloat)
-      multMatrix m
-      materialDiffuse FrontAndBack $= blue
+      tmat <- newMatrix RowMajor (fst tmatAndRadius) :: IO (GLmatrix GLfloat)
+      multMatrix tmat
+      materialDiffuse Front $= blue
       renderObject Solid $ Torus 0.2 (snd tmatAndRadius) 30 30
   swapBuffers
 
@@ -140,9 +140,8 @@ main = do
   windowSize $= Size 500 500
   initialDisplayMode $= [RGBAMode, DoubleBuffered, WithDepthBuffer]
   clearColor $= white
-  materialAmbient FrontAndBack $= black
+  materialAmbient Front $= black
   lighting $= Enabled
-  lightModelTwoSide $= Enabled
   light (Light 0) $= Enabled
   position (Light 0) $= Vertex4 0 0 (-100) 1
   ambient (Light 0) $= black

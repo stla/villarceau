@@ -24,3 +24,4 @@ cabal.project.local~
 *.gif
 *.ppm
 gallery/
+src/Blog/

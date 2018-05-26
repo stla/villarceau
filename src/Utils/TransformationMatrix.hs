@@ -2,8 +2,7 @@ module Utils.TransformationMatrix
   where
 import           Data.Foldable                (toList)
 import           Graphics.Rendering.OpenGL.GL (GLdouble)
-import           Linear                       hiding (lookAt, perspective,
-                                               rotate)
+import           Linear
 
 -- | the plane passing by three points
 plane3pts :: Num a => V3 a -> V3 a -> V3 a -> (V3 a, a)

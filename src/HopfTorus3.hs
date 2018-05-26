@@ -26,7 +26,7 @@ tripletOnCircle u =
     k = 3.0
     n = 3.0 -- number of lobes
     cosnu = cos (n*u)
-    d = sqrt (1 + k*k*cosnu*cosnu) -- manque sqrt sur mon blog !
+    d = sqrt (1 + k*k*cosnu*cosnu)
     x = cos u / d
     y = sin u / d
     z = k * cosnu / d
@@ -77,7 +77,7 @@ display context alpha = do
     preservingMatrix $ do
       m <- newMatrix RowMajor (fst tmatAndRadius) :: IO (GLmatrix GLfloat)
       multMatrix m
-      materialDiffuse FrontAndBack $= blue
+      materialDiffuse Front $= blue
       renderObject Solid $ Torus 0.1 (snd tmatAndRadius) 30 30
   swapBuffers
 
@@ -132,9 +132,8 @@ main = do
   windowSize $= Size 500 500
   initialDisplayMode $= [RGBAMode, DoubleBuffered, WithDepthBuffer]
   clearColor $= white
-  materialAmbient FrontAndBack $= black
+  materialAmbient Front $= black
   lighting $= Enabled
-  lightModelTwoSide $= Enabled
   light (Light 0) $= Enabled
   position (Light 0) $= Vertex4 0 0 (-100) 1
   ambient (Light 0) $= black
