@@ -5,3 +5,4 @@ packages:
 
 extra-deps:
 - gl-capture-0.1.0.0
+- palette-0.3.0.1
