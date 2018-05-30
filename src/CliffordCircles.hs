@@ -111,8 +111,8 @@ idle anim snapshots alpha = do
       when (s < 100) $ do
         let ppm = printf "ppm/clifford%04d.ppm" s
         (>>=) capturePPM (B.writeFile ppm)
-      snapshots $~! (+ 1)
-      alpha $~! (+ 1/10)
+        snapshots $~! (+ 1)
+        alpha $~! (+ 1/10)
       postRedisplay Nothing
     return ()
 
