@@ -9,6 +9,10 @@ hopfinverse q0 q1 q2 t =
    h * cos t * (1+q2),
    h * (sin t * q0 - cos t * q1))
 
+hopfinverse' :: (Num a, Floating a) => a -> a -> a -> (a,a,a,a)
+hopfinverse' theta phi =
+  hopfinverse (cos theta * cos phi) (sin theta * cos phi) (sin phi) 
+
 -- hopfinverse' :: [GLfloat] -> GLfloat -> Vertex3 GLfloat
 -- hopfinverse' q t = toVx3 (hopfinverse q t)
 --    where

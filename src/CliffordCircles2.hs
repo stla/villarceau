@@ -83,7 +83,7 @@ resize zoom s@(Size w h) = do
   matrixMode $= Projection
   loadIdentity
   perspective 45.0 (w'/h') 1.0 100.0
-  lookAt (Vertex3 0 0 (-10+zoom)) (Vertex3 0 0 0) (Vector3 0 1 0)
+  lookAt (Vertex3 0 0 (-15+zoom)) (Vertex3 0 0 0) (Vector3 0 1 0)
   matrixMode $= Modelview 0
   where
     w' = realToFrac w
@@ -119,7 +119,7 @@ idle anim snapshots alpha = do
     when a $ do
       when (s < 200) $ do
         when (even s) $ do
-          let ppm = printf "ppm/clifford%04d.ppm" (s `div` 2) 
+          let ppm = printf "ppm/clifford%04d.ppm" (s `div` 2)
           (>>=) capturePPM (B.writeFile ppm)
         snapshots $~! (+ 1)
         alpha $~! (+ 1/20)

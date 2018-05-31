@@ -32,6 +32,8 @@ library
                      , CliffordCircles
                      , Utils.Colour
                      , CliffordCircles2
+                     , Utils.Rotation4D
+                     , LinkedHopfTori
   build-depends:       base >= 4.7 && < 5
                      , OpenGL
                      , GLUT
