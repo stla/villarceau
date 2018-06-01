@@ -3,10 +3,10 @@ module Utils.Rotation4D
 
 rotate4D :: (Num a, Floating a) => a -> a -> a -> (a,a,a,a) -> (a,a,a,a)
 rotate4D theta phi alpha (p,q,r,s) =
-  [ a*p - b*q - c*r - d*s
+  ( a*p - b*q - c*r - d*s
   , a*q + b*p + c*s - d*r
   , a*r - b*s + c*p + d*q
-  , a*s + b*r - c*q + d*p ]
+  , a*s + b*r - c*q + d*p )
   where
     a = cos alpha
     b = sintheta * cos phi * sinalpha
