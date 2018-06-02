@@ -34,6 +34,7 @@ library
                      , CliffordCircles2
                      , Utils.Rotation4D
                      , LinkedHopfTori
+                     , LinkedHopfTori2
   build-depends:       base >= 4.7 && < 5
                      , OpenGL
                      , GLUT
@@ -126,6 +127,18 @@ executable linkedtori
   hs-source-dirs:      src-exe
   main-is:             ExeLinkedHopfTori.hs
   ghc-options:         -fllvm -main-is ExeLinkedHopfTori
+  build-depends:       base >= 4.7 && < 5
+                     , villarceau
+  default-language:    Haskell2010
+
+executable linkedtori2
+  if flag(exe)
+    buildable: True
+  else
+    buildable: False
+  hs-source-dirs:      src-exe
+  main-is:             ExeLinkedHopfTori2.hs
+  ghc-options:         -fllvm -main-is ExeLinkedHopfTori2
   build-depends:       base >= 4.7 && < 5
                      , villarceau
   default-language:    Haskell2010
