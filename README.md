@@ -16,4 +16,4 @@
 
 [![Imgur](https://i.imgur.com/zu4dwUC.png)](https://imgur.com/a/SEc5KZx)
 
-[![Imgur](https://i.imgur.com/fguyLQp.png)](https://imgur.com/fguyLQp)
+[![Imgur](https://i.imgur.com/fguyLQp.png)](https://imgur.com/a/4upLH6f)
