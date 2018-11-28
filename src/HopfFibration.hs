@@ -1,5 +1,6 @@
 module HopfFibration
   where
+import           Control.Concurrent                (threadDelay)
 import           Control.Monad                     (forM_, when)
 import qualified Data.ByteString                   as B
 import           Data.IORef
@@ -126,7 +127,7 @@ resize zoom s@(Size w h) = do
   matrixMode $= Projection
   loadIdentity
   perspective 45.0 (w'/h') 1.0 100.0
-  lookAt (Vertex3 0 0 (-35+zoom)) (Vertex3 0 0 0) (Vector3 0 1 0)
+  lookAt (Vertex3 0 0 (-15+zoom)) (Vertex3 0 0 0) (Vector3 0 1 0)
   matrixMode $= Modelview 0
   where
     w' = realToFrac w
@@ -135,10 +136,15 @@ resize zoom s@(Size w h) = do
 keyboard :: IORef GLfloat -> IORef GLfloat -> IORef GLfloat -- rotations
          -> IORef GLdouble -- zoom
          -> IORef Bool -- animation
+         -> IORef Int -- thread delay (animation rate)
+         -> IORef Bool -- save
          -> KeyboardCallback
-keyboard rot1 rot2 rot3 zoom anim c _ = do
+keyboard rot1 rot2 rot3 zoom anim delay save c _ = do
   case c of
     'a' -> anim $~! not
+    'o' -> delay $~! (+10000)
+    'p' -> delay $~! (\d -> if d==0 then 0 else d-10000)
+    's' -> save $~! not
     'e' -> rot1 $~! subtract 2
     'r' -> rot1 $~! (+2)
     't' -> rot2 $~! subtract 2
@@ -151,17 +157,21 @@ keyboard rot1 rot2 rot3 zoom anim c _ = do
     _   -> return ()
   postRedisplay Nothing
 
-idle :: IORef Bool -> IORef Int -> IORef GLfloat -> IdleCallback
-idle anim snapshots alpha = do
+idle :: IORef Bool -> IORef Int -> IORef Bool -> IORef Int -> IORef GLfloat
+     -> IdleCallback
+idle anim delay save snapshots alpha = do
     a <- get anim
-    s <- get snapshots
-    when (a && ppmExists) $ do
-      when (s < 360) $ do
-        let ppm = printf "ppm/fibration%04d.ppm" s
+    snapshot <- get snapshots
+    s <- get save
+    when a $ do
+      d <- get delay
+      when (s && ppmExists && snapshot < 360) $ do
+        let ppm = printf "ppm/fibration%04d.ppm" snapshot
         (>>=) capturePPM (B.writeFile ppm)
-        print s
-      snapshots $~! (+1)
+        print snapshot
+        snapshots $~! (+1)
       alpha $~! (+1)
+      _ <- threadDelay d
       postRedisplay Nothing
     return ()
 
@@ -187,6 +197,8 @@ main = do
   zoom <- newIORef 0.0
   alpha <- newIORef 0.0
   anim <- newIORef False
+  delay <- newIORef 0
+  save <- newIORef False
   snapshots <- newIORef 0
   displayCallback $= display Context { contextRot1 = rot1,
                                        contextRot2 = rot2,
@@ -194,13 +206,15 @@ main = do
                                        contextZoom = zoom }
                              alpha
   reshapeCallback $= Just (resize 0)
-  keyboardCallback $= Just (keyboard rot1 rot2 rot3 zoom anim)
-  idleCallback $= Just (idle anim snapshots alpha)
+  keyboardCallback $= Just (keyboard rot1 rot2 rot3 zoom anim delay save)
+  idleCallback $= Just (idle anim delay save snapshots alpha)
   putStrLn "*** Hopf fibration ***\n\
         \    To quit, press q.\n\
         \    Scene rotation:\n\
         \        e, r, t, y, u, i\n\
         \    Zoom: l, m\n\
         \    Animation: a\n\
+        \    Animation speed: o, p\n\
+        \    Save animation: s\n\
         \"
   mainLoop
