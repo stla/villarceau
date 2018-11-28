@@ -45,6 +45,7 @@ library
                      , bytestring
                      , colour
                      , palette
+                     , directory
   default-language:    Haskell2010
   ghc-options:         -Wall
 

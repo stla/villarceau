@@ -8,10 +8,16 @@ import           Graphics.Rendering.OpenGL.Capture (capturePPM)
 import           Graphics.Rendering.OpenGL.GL
 import           Graphics.UI.GLUT
 import           Linear                            (V3 (..))
+import           System.Directory                  (doesDirectoryExist)
+import           System.IO.Unsafe
 import           Text.Printf
 import           Utils.TransformationMatrix
 
 type Point = (GLfloat,GLfloat,GLfloat)
+
+ppmExists :: Bool
+{-# NOINLINE ppmExists #-}
+ppmExists = unsafePerformIO $ doesDirectoryExist "./ppm"
 
 pointToV3 :: Point -> V3 GLfloat
 pointToV3 (x,y,z) = V3 x y z
@@ -149,7 +155,7 @@ idle :: IORef Bool -> IORef Int -> IORef GLfloat -> IdleCallback
 idle anim snapshots alpha = do
     a <- get anim
     s <- get snapshots
-    when a $ do
+    when (a && ppmExists) $ do
       when (s < 360) $ do
         let ppm = printf "ppm/fibration%04d.ppm" s
         (>>=) capturePPM (B.writeFile ppm)
