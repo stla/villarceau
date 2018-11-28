@@ -35,6 +35,7 @@ library
                      , Utils.Rotation4D
                      , LinkedHopfTori
                      , LinkedHopfTori2
+                     , HopfFibration
   build-depends:       base >= 4.7 && < 5
                      , OpenGL
                      , GLUT
