@@ -21,7 +21,5 @@ cabal.project.local~
 .HTF/
 .ghc.environment.*
 *.png
-*.gif
 *.ppm
-gallery/
 src/Blog/

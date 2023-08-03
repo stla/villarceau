@@ -2,6 +2,26 @@
 
 ## Gallery
 
+![](gallery/HopfTorus1.gif)
+
+![](gallery/HopfTorus2.gif)
+
+![](gallery/HopfTorus3.gif)
+
+![](gallery/HopfTorus4.gif)
+
+![](gallery/HopfTorus5.gif)
+
+![](gallery/HopfTorus6.gif)
+
+![](gallery/HopfTorus7.gif)
+
+![](gallery/HopfTorus8.gif)
+
+![](gallery/HopfTorus9.gif)
+
+
+
 [![gfycat](https://thumbs.gfycat.com/LoathsomeOnlyIslandcanary-size_restricted.gif)](https://gfycat.com/LoathsomeOnlyIslandcanary)
 
 [![gfycat](https://thumbs.gfycat.com/LeanAdmiredChinchilla-size_restricted.gif)](https://gfycat.com/LeanAdmiredChinchilla)
